@@ -1,6 +1,0 @@
-../Core/Src/stranky/atmosfera.c:26:6:konverzeNamerenychHodnotSigned	5
-../Core/Src/stranky/atmosfera.c:59:6:konverzeNamerenychHodnotUnsigned	3
-../Core/Src/stranky/atmosfera.c:85:6:vykresliHodnotyNaStranceAtmosfera	1
-../Core/Src/stranky/atmosfera.c:98:6:aktualizujHodnotyNaStranceAtmosfera	1
-../Core/Src/stranky/atmosfera.c:110:6:vykresliPopiskyKHodnotam	1
-../Core/Src/stranky/atmosfera.c:154:6:vykresliStrankuAtmosfera	1

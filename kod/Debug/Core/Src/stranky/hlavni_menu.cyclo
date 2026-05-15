@@ -1,6 +1,0 @@
-../Core/Src/stranky/hlavni_menu.c:26:6:vykresliHorniListuVHlavnimMenu	3
-../Core/Src/stranky/hlavni_menu.c:80:6:vykresliStavSDKartyVHlavnimMenu	1
-../Core/Src/stranky/hlavni_menu.c:94:6:aktualizujStavSDKartyVHlavnimMenu	7
-../Core/Src/stranky/hlavni_menu.c:164:6:aktualizujHodinyVHlavnimMenu	4
-../Core/Src/stranky/hlavni_menu.c:197:6:aktualizujPoziciVyberuVHlavnimMenu	1
-../Core/Src/stranky/hlavni_menu.c:207:9:vykresliHlavniMenu	7
