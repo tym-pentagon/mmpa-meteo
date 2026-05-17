@@ -10,4 +10,4 @@ Jedná se o projekt [týmu Pentagon](https://github.com/tym-pentagon).
  - [LoRa datasheet](https://www.mouser.com/pdfDocs/DS_LLCC68_V10-2.pdf)
  - [STM32 SD Card Interface via SPI and FatFS Tutorial (No RTOS)](https://www.youtube.com/watch?v=PBIm8BCnbyQ) - video tutoriál
  - [Deepseek](https://chat.deepseek.com/) - generování programu pro export fontů
- - [ChatGPT](https://chatgpt.com/) - debugování
+ - [ChatGPT](https://chatgpt.com/) & [GitHub Copilot modely](https://github.com/copilot) (studentská licence) - debugování
