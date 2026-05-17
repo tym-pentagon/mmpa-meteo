@@ -38,7 +38,7 @@ ishikawa-beta
       GPS
 ```
 > [!TIP]
-> Pokud jsi **nováček**, doporučujeme přečíst [Pojmy & zkratky](/Informace/pojmy-zkratky).
+> Pokud jsi **nováček**, doporučujeme přečíst [Pojmy & zkratky](/Informace/pojmy-zkratky.md).
 ### Senzorová soustava
 |     Veličina    ||       Senzor        |       Vstup       |      Výstup      |
 |:---------------:|:-:|:---------------------:|:-----------------:|:----------------:|
