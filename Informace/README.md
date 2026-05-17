@@ -1,7 +1,7 @@
 > [!IMPORTANT]
 > ### Stanice `MMPa meteo` se momentálně skládá ze dvou desek.
-> **[Deska vnější](/Informace/PCB-external)** je vybavena sensory, ze kterých po intervalech čte data a technologií [LoRa](/Informace/LoRa.md) je posílá desce vnitřní.  
-> **[Deska vnitřní](/Informace/PCB-internal)** data přijímá z desky vnější, ukazuje je uživateli a zapisuje do SD karty.
+> **Deska vnější** je vybavena sensory, ze kterých po intervalech čte data a technologií [LoRa](/Informace/README.md#komunikace) je posílá desce vnitřní.  
+> **Deska vnitřní** data přijímá z desky vnější, ukazuje je uživateli a zapisuje do SD karty.
 
 > [!TIP]
 > Projekt je budován tak, aby naplnil [základní kompetenční ustanovení](Informace/zakladni-kompetecni-listina.md).  
@@ -76,3 +76,15 @@ Každá fotodioda je sériově připojena k resistoru s odporem $R$ a k němu pa
 Spoluprácí obou diod dokážeme optimálně pokrýt celé reálné světelné rozmezí.
 
 Viz. [schéma](/Schema/schema.pdf).
+
+### Komunikace
+
+| Typ komunikace | Rychlost            | Dosah  |
+|----------------|---------------------|--------|
+| [LoRa](https://cs.wikipedia.org/wiki/LoRa)| 11 $\text{bps}$ - 203 $\text{kbps}$   | 4.8 $\text{km}$ |
+| 2.4 $\text{GHz}$ Wi-Fi  | 450 $\text{Mbps}$ - 600 $\text{Mbps}$ | 36 $\text{m}$   |
+| 5 $\text{GHz}$ Wi-Fi    | 1.3 $\text{Gbps}$            | 12 $\text{m}$   |
+|   [Bluetooth](https://cs.wikipedia.org/wiki/Bluetooth)| dle verze (max 24 $\text{MBps}$)| dle verze (max 100 $\text{m}$)|
+
+> [!NOTE]
+> Jde pouze o přibližné hodnoty, skutečný dosah a rychlost budou omezeny rychlostí mikrokontroléru, rušením signálu a typem prostředí. 
