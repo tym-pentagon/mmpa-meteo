@@ -5,7 +5,7 @@
 
 > [!TIP]
 > Projekt je budován tak, aby naplnil [základní kompetenční ustanovení](Informace/zakladni-kompetecni-listina.md).  
-> Projekt při operaci musí naplňovat [stanovení MVP](Informace/MVP.md) (**M**inimum **V**iable **P**roduct).
+> Projekt při operaci musí naplňovat stanovení **MVP** (**M**inimum **V**iable **P**roduct), označeno ⁕.
 
 ## Složení stanice
 `[`Ozávorkované`]` body čekají na implementaci.  
@@ -40,17 +40,17 @@ ishikawa-beta
 > [!TIP]
 > Pokud jsi **nováček**, doporučujeme přečíst [Pojmy & zkratky](/Informace/pojmy-zkratky).
 ### Senzorová soustava
-|     Veličina    |       Senzor        |       Vstup       |      Výstup      |
-|:---------------:|:---------------------:|:-----------------:|:----------------:|
-|||||
-| Vítr - rychlost |  Akustický anemometr dvouosý  | 2x zvuková křivka |        $\text{ms}^{-1}$       | 
-|   Vítr - směr   |  Akustický anemometr dvouosý  | 2x zvuková křivka |      $\degree$      |
-|     Teplota     |         BME280        |   Binární data   |     $\textdegree C$    |
-|     Vlhkost     |         BME280        |   Binární data   |     %     |
-|       Tlak      |         BME280        |   Binární data   |     $\text{MPa}$   |
-|       Čas       |         GPS           |      LoRa        |   $\text{ms}$    |
-|   Zemětřesení   |  Akcelerometr LIS3DH  |      *TBD*       |  st. zemětřesení  |
-|   Světlo        |     2 diody BPW34S    |      Analog.     | oblačnost |
+|     Veličina    ||       Senzor        |       Vstup       |      Výstup      |
+|:---------------:|:-:|:---------------------:|:-----------------:|:----------------:|
+||||||
+| Vítr - rychlost ||  Akustický anemometr dvouosý  | 2x zvuková křivka |        $\text{ms}^{-1}$       | 
+|   Vítr - směr   ||  Akustický anemometr dvouosý  | 2x zvuková křivka |      $\degree$      |
+|     Teplota     |⁕|         BME280        |   Binární data   |     $\textdegree C$    |
+|     Vlhkost     |⁕|         BME280        |   Binární data   |     %     |
+|       Tlak      |⁕|         BME280        |   Binární data   |     $\text{MPa}$   |
+|       Čas       |⁕|         GPS           |      LoRa        |   $\text{ms}$    |
+|   Zemětřesení   ||  Akcelerometr LIS3DH  |      *TBD*       |  st. zemětřesení  |
+|   Světlo        ||     2 diody BPW34S    |      Analog.     | oblačnost |
 #### BME280
 BME je modul měříci teplotu, vlhkost vzduchu a tlak okolí. K desce je připojen přes **SPI**.
 ##### Pocitová teplota
@@ -79,12 +79,12 @@ Viz. [schéma](/Schema/schema.pdf).
 
 ### Komunikace
 
-| Typ komunikace | Rychlost            | Dosah  |
-|----------------|---------------------|--------|
-| [LoRa](https://cs.wikipedia.org/wiki/LoRa)| 11 $\text{bps}$ - 203 $\text{kbps}$   | 4.8 $\text{km}$ |
-| 2.4 $\text{GHz}$ Wi-Fi  | 450 $\text{Mbps}$ - 600 $\text{Mbps}$ | 36 $\text{m}$   |
-| 5 $\text{GHz}$ Wi-Fi    | 1.3 $\text{Gbps}$            | 12 $\text{m}$   |
-|   [Bluetooth](https://cs.wikipedia.org/wiki/Bluetooth)| dle verze (max 24 $\text{MBps}$)| dle verze (max 100 $\text{m}$)|
+| Typ komunikace || Rychlost            | Dosah  |
+|----------------|-|---------------------|--------|
+| [LoRa](https://cs.wikipedia.org/wiki/LoRa)|⁕| 11 $\text{bps}$ - 203 $\text{kbps}$   | 4.8 $\text{km}$ |
+| 2.4 $\text{GHz}$ Wi-Fi  || 450 $\text{Mbps}$ - 600 $\text{Mbps}$ | 36 $\text{m}$   |
+| 5 $\text{GHz}$ Wi-Fi    || 1.3 $\text{Gbps}$            | 12 $\text{m}$   |
+|   [Bluetooth](https://cs.wikipedia.org/wiki/Bluetooth)|| dle verze (max 24 $\text{MBps}$)| dle verze (max 100 $\text{m}$)|
 
 > [!NOTE]
 > Jde pouze o přibližné hodnoty, skutečný dosah a rychlost budou omezeny rychlostí mikrokontroléru, rušením signálu a typem prostředí. 
