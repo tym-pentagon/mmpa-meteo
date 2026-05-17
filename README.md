@@ -11,4 +11,4 @@ Jedná se o projekt [týmu Pentagon](https://github.com/tym-pentagon).
  - [STM32 SD Card Interface via SPI and FatFS Tutorial (No RTOS)](https://www.youtube.com/watch?v=PBIm8BCnbyQ) - video tutoriál
  - Dimitar Toshkov Zhekov - Terminus Font
  - [Deepseek](https://chat.deepseek.com/) - generování programu pro export fontů
- - [ChatGPT](https://chatgpt.com/) - debugování
+ - [ChatGPT](https://chatgpt.com/) & [GitHub Copilot modely](https://github.com/copilot) (studentská licence) - debugování
