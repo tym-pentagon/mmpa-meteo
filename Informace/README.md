@@ -37,7 +37,20 @@ ishikawa-beta
     +
       GPS
 ```
+> [!TIP]
+> Pokud jsi **nováček**, doporučujeme přečíst [Pojmy & zkratky](/Informace/pojmy-zkratky).
 ### Senzorová soustava
+|     Veličina    |       Senzor        |       Vstup       |      Výstup      |
+|:---------------:|:---------------------:|:-----------------:|:----------------:|
+|||||
+| Vítr - rychlost |  Akustický anemometr dvouosý  | 2x zvuková křivka |        $\text{ms}^{-1}$       | 
+|   Vítr - směr   |  Akustický anemometr dvouosý  | 2x zvuková křivka |      $\degree$      |
+|     Teplota     |         BME280        |   Binární data   |     $\textdegree C$    |
+|     Vlhkost     |         BME280        |   Binární data   |     %     |
+|       Tlak      |         BME280        |   Binární data   |     $\text{MPa}$   |
+|       Čas       |         GPS           |      LoRa        |   $\text{ms}$    |
+|   Zemětřesení   |  Akcelerometr LIS3DH  |      *TBD*       |  st. zemětřesení  |
+|   Světlo        |     2 diody BPW34S    |      Analog.     | oblačnost |
 #### BME280
 BME je modul měříci teplotu, vlhkost vzduchu a tlak okolí. K desce je připojen přes **SPI**.
 ##### Pocitová teplota
@@ -56,9 +69,10 @@ Možné vzorce pro použití:
 >Lze použít více vzorců pro různá období.  
   
 #### Osvětlení
-Pro detekci osvětlení se používají dvě fotodiody [BPW 34 S](https://look.ams-osram.com/m/1f206a499ac1f0b2/original/BPW-34-S.pdf). Jejich výstupy budou zavedeny do MCU jako kanály nízkofrekvenčního ADC
+Pro detekci osvětlení se používají dvě fotodiody [BPW34S](https://look.ams-osram.com/m/1f206a499ac1f0b2/original/BPW-34-S.pdf). Jejich výstupy budou zavedeny do MCU jako kanály nízkofrekvenčního ADC
 Každá fotodioda je sériově připojena k resistoru s odporem $R$ a k němu paralelně operačnímu zesilovači.
 - **Denní osvětlení** vrací dioda `D800`, na kterou navazuje se zesilovačem odpor $R = 10 \text{ k}\Omega$, dokážeme s ní tedy zachycovat makroskopické měřítko s přesností pro denní svit dostatečnou.
 - **Noční osvětlení** (světelný smog) vrací dioda `D801`, kde $R = 1 \text{ M}\Omega$, lze s ní receptovat malé rozmezí s velmi velkou přesností.
 Spoluprácí obou diod dokážeme optimálně pokrýt celé reálné světelné rozmezí.
+
 Viz. [schéma](/Schema/schema.pdf).
