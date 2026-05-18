@@ -556,7 +556,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         // Kód, který se spustí každou sekundu:
     	mereni = true;
     	aktualizujCas(&cas);
-    	if (cas.sekundy % 10 == 0) {
+    	if (cas.sekundy == 0) {
     		je_cas_zapsat_log = true;
     	}
     }
