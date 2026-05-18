@@ -124,6 +124,9 @@ extern bool can_send_data; // Zda LoRa může posílat data
 
 uint8_t lora_data[DATA_LEN]; // Data pro odeslání
 
+extern bool jednotka_ma_gps;
+extern bool jednotka_ziskala_cas_z_gps;
+
 bool mereni = false; // Zda se MCU má ptát senzorů na aktuální hodnoty
 // Měří se každou sekundu
 // Omezení je z důvodu přehřívání senzorů
@@ -313,6 +316,18 @@ void pridatChecksum(uint8_t data[], size_t data_len) {
 void pripravitDataProOdeslani() {
 	memset(lora_data, 0, DATA_LEN); // Vynuluje data pro odeslání
 
+	if (jednotka_ziskala_cas_z_gps) {
+		lora_data[0] = (cas.rok >> 8) & 0xFF; // MSB
+		lora_data[1] = cas.rok & 0xFF; // LSB
+
+		lora_data[2] = cas.mesic;
+		lora_data[3] = cas.den;
+
+		lora_data[4] = cas.hodiny;
+		lora_data[5] = cas.minuty;
+		lora_data[6] = cas.sekundy;
+	}
+
 	lora_data[7] = (teplota >> 24) & 0xFF; // MSB
 	lora_data[8]  = (teplota >> 16) & 0xFF;
 	lora_data[9] = (teplota >> 8)  & 0xFF;
@@ -352,6 +367,19 @@ void LoRa_Rx_callback(uint8_t data_received[], uint8_t len) {
 	if (!zkontrolovatChecksum(data_received, len)) {
 		// Checksum nesedí
 		// TODO: Error handling
+	}
+
+	if (!jednotka_ma_gps && (data_received[0] != 0 || data_received[1] != 0 || data_received[2] != 0 || data_received[3] != 0 || data_received[4] != 0 || data_received[5] != 0 || data_received[6] != 0)) {
+		cas.rok =
+			((uint16_t)data_received[0] << 8) |
+			((uint16_t)data_received[1]);
+
+		cas.mesic = (uint8_t)data_received[2];
+		cas.den = (uint8_t)data_received[3];
+
+		cas.hodiny = (uint8_t)data_received[4];
+		cas.minuty = (uint8_t)data_received[5];
+		cas.sekundy = (uint8_t)data_received[6];
 	}
 
 	teplota_venku =

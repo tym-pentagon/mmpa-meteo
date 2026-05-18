@@ -16,6 +16,7 @@ volatile uint16_t rx_char_index = 0;
 char zprava[128];
 volatile bool zprava_pripravena = false;
 volatile bool jednotka_ma_gps = false;
+volatile bool jednotka_ziskala_cas_z_gps = false;
 
 typedef enum {
 	INVALID,
@@ -57,6 +58,8 @@ void gps_loop() {
 			}
 
 			if (i == 1 && typ_packetu == RMC && strlen(argument) >= 6) {
+				jednotka_ziskala_cas_z_gps = true;
+
 				cas.hodiny = charToInt(argument[0]) * 10 + charToInt(argument[1]);
 				cas.minuty = charToInt(argument[2]) * 10 + charToInt(argument[3]);
 				cas.sekundy = charToInt(argument[4]) * 10 + charToInt(argument[5]);
