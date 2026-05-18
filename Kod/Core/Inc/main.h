@@ -34,6 +34,7 @@ extern "C" {
 #include "spi.h"
 #include "usart.h"
 #include "stm32_adafruit_lcd.h"
+#include "sd.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -78,7 +79,7 @@ typedef struct {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-uint8_t stavSD(void);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

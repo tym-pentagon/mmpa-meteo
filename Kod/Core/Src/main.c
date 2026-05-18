@@ -34,6 +34,7 @@
 #include "string.h"
 #include "stdarg.h" // For va_list var arg functions
 #include "stdbool.h"
+#include "sd.h"
 
 /* Komunikace */
 #include "lora.h"
@@ -83,18 +84,9 @@ uint32_t vlhkost_venku, tlak_venku;
 
 bool stisknuto = 0; // Zda bylo stisknuto tlačítko na rotačním enkodéru
 
-/* Proměnné pro FatFs */
-FATFS FatFs; 	// FatFs handle
-FIL fil; 		// File handle
-FRESULT fres;   // Result after operations
-
-uint8_t predchozi_stav_promenne_sd_karta_pripojena = 2;
-// Předchozí stav proměnné je nastaven mimo rozsah, protože proměnná ještě nebyla inicializována.
-
-bool vyzkouseno_pripojeni_sd_karty = 0;
-bool sd_karta_pripojena = 0;
-uint32_t kapacita_sd_karty = 0; // KB
-uint32_t zaplneni_sd_karty = 0; // KB
+extern bool sd_karta_pripojena;
+extern uint32_t kapacita_sd_karty;
+extern uint32_t zaplneni_sd_karty;
 
 uint8_t strana = 0;
 
@@ -117,8 +109,6 @@ const char nazvy_mesicu[12][10] = {
  */
 
 char debug[500];
-
-extern Disk_drvTypeDef  disk;
 
 extern bool can_send_data; // Zda LoRa může posílat data
 
@@ -146,14 +136,6 @@ bool zkontrolovatChecksum(uint8_t data[], size_t data_len);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-/* Allow SD card remounting */
-DSTATUS disk_reinitialize (
-	BYTE pdrv				/* Physical drive number to identify the drive */
-)
-{
-	return disk.drv[pdrv]->disk_initialize(disk.lun[pdrv]);
-}
-
 void aktualizujCas(Cas *cas) {
 	/* Tato funkce se spustí každou sekundu, vždy aktualizuje proměnnou cas */
 	cas->sekundy ++;
@@ -244,63 +226,13 @@ void tlacitkoStisknuto(void) {
 	else if (strana == 1) {
 		if (pozice_vyberu == 0) {
 			strana = 0;
-			predchozi_stav_promenne_sd_karta_pripojena = 2; // Mimo rozsah, protože spodní lišta potřebuje znovu vykreslit
-			vykresliHlavniMenu(pripojeno, ping, cas, &predchozi_pozice_vyberu, &pozice_vyberu, &max_pozice_vyberu, vyzkouseno_pripojeni_sd_karty);
+			vykresliHlavniMenu(pripojeno, ping, cas, &predchozi_pozice_vyberu, &pozice_vyberu, &max_pozice_vyberu);
 		}
 	}
 
 	ssd1306_SetCursor(122, 13);
 	ssd1306_WriteString("0", &Terminus12Bold, 1);
 	ssd1306_UpdateScreen(); // Vykreslí na OLED displej
-}
-
-uint8_t stavSD(void) {
-	/* Získá stav SD karty - zda je připojena, jakou má kapacitu a kolik je na ní volného místa */
-
-	f_mount(NULL, "", 1); // Nejprve odpojí
-
-	// 4. NOW initialize disk
-	if (disk_reinitialize(0) != RES_OK) {
-		vyzkouseno_pripojeni_sd_karty = 1;
-		sd_karta_pripojena = 0; // SD karta je odpojena
-	}
-	else {
-		fres = f_mount(&FatFs, "", 1); // 1 = mount now
-
-		if (fres != FR_OK) {
-			// Otevře filesystém
-			vyzkouseno_pripojeni_sd_karty = 1;
-			sd_karta_pripojena = 0; // SD karta je odpojena
-		}
-		else {
-			vyzkouseno_pripojeni_sd_karty = 1;
-			sd_karta_pripojena = 1; // SD karta je připojena
-
-			// Získá statistiky o zaplnění úložiště
-			DWORD free_clusters, free_sectors, total_sectors;
-
-			FATFS* getFreeFs;
-
-			fres = f_getfree("", &free_clusters, &getFreeFs);
-			if (fres != FR_OK) {
-				return 1; // Nelze přečíst údaje o zaplnění úložiště
-			}
-
-			// Formula comes from ChaN's documentation
-			total_sectors = (getFreeFs->n_fatent - 2) * getFreeFs->csize;
-			free_sectors = free_clusters * getFreeFs->csize;
-
-			kapacita_sd_karty = (total_sectors / 2);
-			zaplneni_sd_karty = (total_sectors / 2 - free_sectors / 2);
-		}
-	}
-
-	if (strana == 0 && sd_karta_pripojena != predchozi_stav_promenne_sd_karta_pripojena) { // Pokud je uživatel v hlavním menu
-		predchozi_stav_promenne_sd_karta_pripojena = sd_karta_pripojena;
-		aktualizujStavSDKartyVHlavnimMenu(sd_karta_pripojena, kapacita_sd_karty, zaplneni_sd_karty);
-	}
-
-	return 0; // Funkce úspěšně skončila
 }
 
 void pridatChecksum(uint8_t data[], size_t data_len) {
@@ -493,7 +425,7 @@ int main(void)
 
   ssd1306_UpdateScreen(); // Vykreslí na OLED displej
 
-  vykresliHlavniMenu(pripojeno, ping, cas, &predchozi_pozice_vyberu, &pozice_vyberu, &max_pozice_vyberu, vyzkouseno_pripojeni_sd_karty);
+  vykresliHlavniMenu(pripojeno, ping, cas, &predchozi_pozice_vyberu, &pozice_vyberu, &max_pozice_vyberu);
 
   stavSD();
 
@@ -522,6 +454,7 @@ int main(void)
 
 	  if (strana == 0) { // Hlavní menu
 		  aktualizujHodinyVHlavnimMenu(cas, &predchozi_cas);
+		  aktualizujStavSDKartyVHlavnimMenu(sd_karta_pripojena, kapacita_sd_karty, zaplneni_sd_karty);
 	  }
 	  if (strana == 1) { // Atmosféra
 		  aktualizujHodnotyNaStranceAtmosfera(teplota, vlhkost, tlak, teplota_venku, vlhkost_venku, tlak_venku);

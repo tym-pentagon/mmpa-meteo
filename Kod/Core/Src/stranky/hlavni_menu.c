@@ -12,6 +12,11 @@
 #include "string.h"
 #include "obrazky.h"
 
+uint8_t predchozi_stav_promenne_sd_karta_pripojena = 2; // Není identifikováno - mimo rozsah
+extern bool sd_karta_pripojena;
+extern uint32_t kapacita_sd_karty;
+extern uint32_t zaplneni_sd_karty;
+
 /* Čtyřúhelníky v menu */
 Point ctyruhelniky[][5] = {
 	{ {163, 176}, {221, 218}, {311, 188}, {163, 81} },
@@ -77,21 +82,13 @@ void vykresliHorniListuVHlavnimMenu(bool pripojeno, uint16_t ping) {
 	BSP_LCD_DrawHLine(PADDING, VYSKA_HORNI_LISTY_V_HLAVNIM_MENU - BORDER, SIRKA_DISPLEJE - 2 * PADDING); // Border
 }
 
-void vykresliStavSDKartyVHlavnimMenu() {
-	BSP_LCD_SetTextColor(BARVA_UI_TERCIARNI);
-	BSP_LCD_DrawHLine(PADDING, VYSKA_DISPLEJE - VYSKA_SPODNI_LISTY_V_HLAVNIM_MENU, SIRKA_DISPLEJE - 2 * PADDING); // Border
-
-	/* Stav SD karty */
-	const char pripojovani_sd_karty_text[] = {
-	    0x50, 0xF8, 0x69, 0x70, 0x6F, 0x6A, 0x6F, 0x76, 0xE1, 0x6E, 0xED, 0x20, 0x53, 0x44, 0x20, 0x6B,  // "Připojování SD k"
-	    0x61, 0x72, 0x74, 0x79, 0x2E, 0x2E, 0x2E, 0x00,  // "arty..."
-	};
-
-	BSP_LCD_SetFont(&Terminus20Bold);
-	BSP_LCD_DisplayStringAt(0, VYSKA_DISPLEJE - (VYSKA_SPODNI_LISTY_V_HLAVNIM_MENU - BORDER) / 2 - Terminus20Bold.Height / 2, (uint8_t *)pripojovani_sd_karty_text, CENTER_MODE);
-}
-
 void aktualizujStavSDKartyVHlavnimMenu(bool sd_karta_pripojena, uint32_t kapacita_sd_karty, uint32_t zaplneni_sd_karty) {
+	if (sd_karta_pripojena == predchozi_stav_promenne_sd_karta_pripojena) {
+		return;
+	}
+
+	predchozi_stav_promenne_sd_karta_pripojena = sd_karta_pripojena;
+
 	BSP_LCD_SetTextColor(BARVA_POZADI);
 	BSP_LCD_FillRect(0, VYSKA_DISPLEJE - (VYSKA_SPODNI_LISTY_V_HLAVNIM_MENU - BORDER), SIRKA_DISPLEJE, VYSKA_SPODNI_LISTY_V_HLAVNIM_MENU - BORDER);
 
@@ -204,7 +201,7 @@ void aktualizujPoziciVyberuVHlavnimMenu(uint16_t predchozi_pozice_vyberu, uint16
 	BSP_LCD_DrawPolygon(ctyruhelniky[pozice_vyberu], 4);
 }
 
-uint8_t vykresliHlavniMenu(uint8_t pripojeno, uint16_t ping, Cas cas, uint16_t *predchozi_pozice_vyberu, uint16_t *pozice_vyberu, uint16_t *max_pozice_vyberu, bool vyzkouseno_pripojeni_sd_karty) {
+uint8_t vykresliHlavniMenu(uint8_t pripojeno, uint16_t ping, Cas cas, uint16_t *predchozi_pozice_vyberu, uint16_t *pozice_vyberu, uint16_t *max_pozice_vyberu) {
 	BSP_LCD_Clear(BARVA_POZADI);
 	BSP_LCD_SetBackColor(BARVA_POZADI);
 
@@ -290,15 +287,13 @@ uint8_t vykresliHlavniMenu(uint8_t pripojeno, uint16_t ping, Cas cas, uint16_t *
 		return 1;
 	}
 
-	if (vyzkouseno_pripojeni_sd_karty) {
-		BSP_LCD_SetTextColor(BARVA_UI_TERCIARNI);
-		BSP_LCD_DrawHLine(PADDING, VYSKA_DISPLEJE - VYSKA_SPODNI_LISTY_V_HLAVNIM_MENU, SIRKA_DISPLEJE - 2 * PADDING); // Border
+	BSP_LCD_SetTextColor(BARVA_UI_TERCIARNI);
+	BSP_LCD_DrawHLine(PADDING, VYSKA_DISPLEJE - VYSKA_SPODNI_LISTY_V_HLAVNIM_MENU, SIRKA_DISPLEJE - 2 * PADDING); // Border
 
-		stavSD();
-	}
-	else {
-		vykresliStavSDKartyVHlavnimMenu();
-	}
+	stavSD();
+
+	predchozi_stav_promenne_sd_karta_pripojena = 2; // Vynutit vykreslení
+	aktualizujStavSDKartyVHlavnimMenu(sd_karta_pripojena, kapacita_sd_karty, zaplneni_sd_karty);
 
 	return 0; // Funkce úspěšně skončila
 }
