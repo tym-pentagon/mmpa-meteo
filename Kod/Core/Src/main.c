@@ -118,6 +118,7 @@ extern bool jednotka_ma_gps;
 extern bool jednotka_ziskala_cas_z_gps;
 
 bool mereni = false; // Zda se MCU má ptát senzorů na aktuální hodnoty
+bool je_cas_zapsat_log = false;
 // Měří se každou sekundu
 // Omezení je z důvodu přehřívání senzorů
 /* USER CODE END PV */
@@ -174,7 +175,7 @@ void aktualizujCas(Cas *cas) {
 					cas->den = 0;
 					cas->mesic ++;
 
-					if (cas->mesic >= 12) {
+					if (cas->mesic >= 13) {
 						cas->mesic = 1;
 						cas->rok ++;
 					}
@@ -435,6 +436,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
 	  if (mereni) {
 		  BME280_Measure(&teplota, &vlhkost, &tlak);
 		  pripravitDataProOdeslani();
@@ -451,6 +453,29 @@ int main(void)
 	  }
 
 	  stavSD();
+	  if (je_cas_zapsat_log) {
+		  char teplota_hodnota_text[20];
+		  char vlhkost_hodnota_text[20];
+		  char tlak_hodnota_text[20];
+
+		  char teplota_venku_hodnota_text[20];
+		  char vlhkost_venku_hodnota_text[20];
+		  char tlak_venku_hodnota_text[20];
+
+		  konverzeNamerenychHodnotSigned(teplota, 100, 2, teplota_hodnota_text, sizeof(teplota_hodnota_text));
+		  konverzeNamerenychHodnotUnsigned(vlhkost, 1024, 3, vlhkost_hodnota_text, sizeof(vlhkost_hodnota_text));
+		  konverzeNamerenychHodnotUnsigned(tlak, 256, 1, tlak_hodnota_text, sizeof(tlak_hodnota_text));
+
+		  konverzeNamerenychHodnotSigned(teplota_venku, 100, 2, teplota_venku_hodnota_text, sizeof(teplota_venku_hodnota_text));
+		  konverzeNamerenychHodnotUnsigned(vlhkost_venku, 1024, 3, vlhkost_venku_hodnota_text, sizeof(vlhkost_venku_hodnota_text));
+		  konverzeNamerenychHodnotUnsigned(tlak_venku, 256, 1, tlak_venku_hodnota_text, sizeof(tlak_venku_hodnota_text));
+
+		  char log[170];
+	  	  snprintf(log, 170, "%02d.%02d.%04d;%02d:%02d:%02d;%s;%s;%s;%s;%s;%s\n", cas.den, cas.mesic, cas.rok, cas.hodiny, cas.minuty, cas.sekundy, teplota_hodnota_text, vlhkost_hodnota_text, tlak_hodnota_text, teplota_venku_hodnota_text, vlhkost_venku_hodnota_text, tlak_venku_hodnota_text);
+	  	  zapsatLog("atm.csv", log);
+
+	  	  je_cas_zapsat_log = false;
+	  }
 
 	  if (strana == 0) { // Hlavní menu
 		  aktualizujHodinyVHlavnimMenu(cas, &predchozi_cas);
@@ -531,6 +556,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
         // Kód, který se spustí každou sekundu:
     	mereni = true;
     	aktualizujCas(&cas);
+    	if (cas.sekundy % 10 == 0) {
+    		je_cas_zapsat_log = true;
+    	}
     }
 }
 

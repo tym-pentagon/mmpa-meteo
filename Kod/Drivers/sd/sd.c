@@ -8,10 +8,10 @@
 #include "stdbool.h"
 #include "sd.h"
 #include "fatfs.h"
+#include "string.h"
 
 /* Proměnné pro FatFs */
 FATFS FatFs; 	// FatFs handle
-FIL fil; 		// File handle
 FRESULT fres;   // Result after operations
 
 volatile bool sd_karta_pripojena = 0;
@@ -64,6 +64,42 @@ uint8_t stavSD(void) {
 			kapacita_sd_karty = (total_sectors / 2);
 			zaplneni_sd_karty = (total_sectors / 2 - free_sectors / 2);
 		}
+	}
+
+	return 0; // Funkce úspěšně skončila
+}
+
+uint8_t zapsatLog(char soubor[], char obsah_logu[]) {
+	FIL fil; 		// File handle
+
+	fres = f_mount(&FatFs, "", 1);
+	if (fres != FR_OK) {
+		// Otevře filesystém
+		sd_karta_pripojena = 0; // SD karta je odpojena
+	}
+
+	fres = f_open(&fil, soubor, FA_OPEN_ALWAYS | FA_OPEN_APPEND | FA_WRITE); // Mód "a", pokud soubor neexistuje, automaticky se vytvoří
+	if (fres != FR_OK) {
+		// Nelze otevřít soubor
+		return fres;
+	}
+
+	UINT pocet_zapsanych_znaku;
+	fres = f_write(&fil, obsah_logu, strlen(obsah_logu), &pocet_zapsanych_znaku);
+	if (fres != FR_OK) {
+		// Nelze zapsat do souboru
+		return 2;
+	}
+	if (pocet_zapsanych_znaku != strlen(obsah_logu)) {
+		// Počet zapsaných znaků neodpovídá délce logu
+		f_close(&fil);
+		return 3;
+	}
+
+	fres = f_close(&fil);
+	if (fres != FR_OK) {
+		// Nelze zavřít soubor
+	    return 4;
 	}
 
 	return 0; // Funkce úspěšně skončila
