@@ -15,6 +15,7 @@ uint8_t rx_char;
 volatile uint16_t rx_char_index = 0;
 char zprava[128];
 volatile bool zprava_pripravena = false;
+volatile bool jednotka_ma_gps = false;
 
 typedef enum {
 	INVALID,
@@ -72,4 +73,24 @@ void gps_loop() {
 
 		typ_packetu = INVALID;
 	}
+}
+
+void gps_UART_RxCpltCallback_handler() {
+	jednotka_ma_gps = true; // Dostali jsme signál z USART2, což znamená, že jednotka má GPS
+
+	if (rx_char == '\r') {
+		// Ignorovat
+	}
+	else if (rx_char == '\n') {
+		zprava[rx_char_index] = '\0';
+		rx_char_index = 0;
+		zprava_pripravena = true;
+	}
+	else {
+		if (rx_char_index < sizeof(zprava) - 1) {
+			zprava[rx_char_index++] = rx_char;
+		}
+	}
+
+	HAL_UART_Receive_IT(&huart2, &rx_char, 1);
 }

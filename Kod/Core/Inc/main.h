@@ -32,6 +32,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "spi.h"
+#include "usart.h"
 #include "stm32_adafruit_lcd.h"
 /* USER CODE END Includes */
 

@@ -40,6 +40,7 @@
 
 /* Senzory */
 #include "bme280.h"
+#include "gps.h"
 
 /* Stránky */
 #include "hlavni_menu.h"
@@ -68,7 +69,7 @@ bool pripojeno = 1;
 uint16_t ping = 9999;
 
 Cas predchozi_cas = {2026, 4, 15, 14, 39, 2}; // Čas při předchozí aktualizace hodin
-Cas cas = {2026, 4, 15, 14, 39, 2};
+extern Cas cas;
 
 uint16_t predchozi_pozice_vyberu = 0;
 uint16_t pozice_vyberu = 0;
@@ -420,6 +421,7 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   LoRa_init();
+  gps_init();
 
   HAL_ADC_Start(&hadc3);
 
@@ -480,6 +482,7 @@ int main(void)
 	  }
 
 	  LoRa_loop();
+	  gps_loop();
 
 	  aktualizujPoziciVyberu();
 	  if (stisknuto == 1) {
@@ -558,8 +561,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	}
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM2) {
 		LoRa_TIM2_interrupt_handler();
 	}
@@ -569,6 +571,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     	mereni = true;
     	aktualizujCas(&cas);
     }
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	if (huart->Instance == USART2) {
+		gps_UART_RxCpltCallback_handler();
+	}
 }
 /* USER CODE END 4 */
 
