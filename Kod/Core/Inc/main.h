@@ -135,6 +135,7 @@ uint8_t stavSD(void);
 #define LCD_Reset_GPIO_Port GPIOG
 
 /* USER CODE BEGIN Private defines */
+#define GPS_UART_HANDLE huart2
 #define LORA_SPI_HANDLE hspi2
 #define BME280_SPI_HANDLE hspi3
 #define SD_SPI_HANDLE hspi4
