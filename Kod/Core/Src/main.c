@@ -311,20 +311,20 @@ void pridatChecksum(uint8_t data[], size_t data_len) {
 void pripravitDataProOdeslani() {
 	memset(lora_data, 0, DATA_LEN); // Vynuluje data pro odeslání
 
-	lora_data[8] = (teplota >> 24) & 0xFF; // MSB
-	lora_data[9]  = (teplota >> 16) & 0xFF;
-	lora_data[10] = (teplota >> 8)  & 0xFF;
-	lora_data[11] = teplota & 0xFF;         // LSB
+	lora_data[7] = (teplota >> 24) & 0xFF; // MSB
+	lora_data[8]  = (teplota >> 16) & 0xFF;
+	lora_data[9] = (teplota >> 8)  & 0xFF;
+	lora_data[10] = teplota & 0xFF;         // LSB
 
-	lora_data[12] = (vlhkost >> 24) & 0xFF; // MSB
-	lora_data[13]  = (vlhkost >> 16) & 0xFF;
-	lora_data[14] = (vlhkost >> 8)  & 0xFF;
-	lora_data[15] = vlhkost & 0xFF;         // LSB
+	lora_data[11] = (vlhkost >> 24) & 0xFF; // MSB
+	lora_data[12]  = (vlhkost >> 16) & 0xFF;
+	lora_data[13] = (vlhkost >> 8)  & 0xFF;
+	lora_data[14] = vlhkost & 0xFF;         // LSB
 
-	lora_data[16] = (tlak >> 24) & 0xFF; // MSB
-	lora_data[17]  = (tlak >> 16) & 0xFF;
-	lora_data[18] = (tlak >> 8)  & 0xFF;
-	lora_data[19] = tlak & 0xFF;         // LSB
+	lora_data[15] = (tlak >> 24) & 0xFF; // MSB
+	lora_data[16]  = (tlak >> 16) & 0xFF;
+	lora_data[17] = (tlak >> 8)  & 0xFF;
+	lora_data[18] = tlak & 0xFF;         // LSB
 
 	pridatChecksum(lora_data, DATA_LEN);
 
@@ -354,23 +354,23 @@ void LoRa_Rx_callback(uint8_t data_received[], uint8_t len) {
 
 	teplota_venku =
 		(int32_t)(
-			((uint32_t)data_received[8] << 24) |
-			((uint32_t)data_received[9] << 16) |
-			((uint32_t)data_received[10] << 8)  |
-			((uint32_t)data_received[11])
+			((uint32_t)data_received[7] << 24) |
+			((uint32_t)data_received[8] << 16) |
+			((uint32_t)data_received[9] << 8)  |
+			((uint32_t)data_received[10])
 		);
 
 	vlhkost_venku =
-		((uint32_t)data_received[12] << 24) |
-		((uint32_t)data_received[13] << 16) |
-		((uint32_t)data_received[14] << 8)  |
-		((uint32_t)data_received[15]);
+		((uint32_t)data_received[11] << 24) |
+		((uint32_t)data_received[12] << 16) |
+		((uint32_t)data_received[13] << 8)  |
+		((uint32_t)data_received[14]);
 
 	tlak_venku =
-		((uint32_t)data_received[16] << 24) |
-		((uint32_t)data_received[17] << 16) |
-		((uint32_t)data_received[18] << 8)  |
-		((uint32_t)data_received[19]);
+		((uint32_t)data_received[15] << 24) |
+		((uint32_t)data_received[16] << 16) |
+		((uint32_t)data_received[17] << 8)  |
+		((uint32_t)data_received[18]);
 }
 /* USER CODE END 0 */
 
