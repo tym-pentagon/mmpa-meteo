@@ -357,7 +357,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  HAL_Delay(2000); // Počká, než se všechny periferie inicializují a jsou schopné komunikovat.
   /* USER CODE END Init */
 
   /* Configure the system clock */
