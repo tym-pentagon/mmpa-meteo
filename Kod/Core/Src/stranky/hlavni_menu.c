@@ -287,6 +287,23 @@ uint8_t vykresliHlavniMenu(uint8_t pripojeno, uint16_t ping, Cas cas, uint16_t *
 		return 1;
 	}
 
+	/* Čtverec pro informaci o časovém pásmu */
+	BSP_LCD_SetTextColor(BARVA_UI_PRIMARNI);
+	BSP_LCD_DrawRect(68, 376, 252 - 68, 26);
+
+	/* Text "Časové pásmo:" */
+	BSP_LCD_SetFont(&Terminus18Normal);
+	const char casove_pasmo_text[] = {
+		0xC8, 0x61, 0x73, 0x6F, 0x76, 0xE9, 0x20, 0x70, 0xE1, 0x73, 0x6D, 0x6F, 0x3A, 0x00,  // "Časové pásmo:"
+	};
+
+	BSP_LCD_DisplayStringAt(72, 380, (uint8_t *)casove_pasmo_text, LEFT_MODE);
+
+	/* Časové pásmo */
+	BSP_LCD_SetTextColor(BARVA_UI_SEKUNDARNI);
+	BSP_LCD_SetFont(&Terminus18Bold);
+	BSP_LCD_DisplayStringAt(72, 380, (uint8_t *)"GMT", RIGHT_MODE);
+
 	BSP_LCD_SetTextColor(BARVA_UI_TERCIARNI);
 	BSP_LCD_DrawHLine(PADDING, VYSKA_DISPLEJE - VYSKA_SPODNI_LISTY_V_HLAVNIM_MENU, SIRKA_DISPLEJE - 2 * PADDING); // Border
 
