@@ -25,8 +25,8 @@ ishikawa-beta
         Wireless
           LoRa
           [Bluetooth]
-          2.4 GHz Wi-Fi
-          5 GHz Wi-Fi
+          [2.4 GHz Wi-Fi]
+          [5 GHz Wi-Fi]
         Wired
           [RS-422]
           [RS-485]
