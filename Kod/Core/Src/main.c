@@ -391,10 +391,6 @@ int main(void)
   	return 1;
   }
 
-  HAL_TIM_Base_Start_IT(&htim11); // Inicializace timeru pro přerušení každou sekundu
-  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL); // Inicializace timeru k rotačnímu enkodéru
-  TIM3->CNT = 0; // Počáteční vynulování
-
   ssd1306_Init(); // Inicializace OLED displeje
 
   /* Inicializace BME280 */
@@ -430,6 +426,9 @@ int main(void)
 
   stavSD();
 
+  HAL_TIM_Base_Start_IT(&htim11); // Inicializace timeru pro přerušení každou sekundu
+  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL); // Inicializace timeru k rotačnímu enkodéru
+  TIM3->CNT = 0; // Počáteční vynulování
   /* USER CODE END 2 */
 
   /* Infinite loop */
