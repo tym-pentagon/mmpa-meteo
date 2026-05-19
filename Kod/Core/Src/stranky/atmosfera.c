@@ -48,7 +48,7 @@ void konverzeNamerenychHodnotSigned(int32_t hodnota, uint32_t delitel, uint8_t p
 	snprintf(
 		vystup,
 		delka_vystupu,
-		"%s%ld.%0*ld",
+		"%s%ld,%0*ld",
 		pozitivni ? "" : "-",
         (long)cela_cast,
         pocet_desetinnych_mist,
@@ -75,7 +75,7 @@ void konverzeNamerenychHodnotUnsigned(uint32_t hodnota, uint32_t delitel, uint8_
 	snprintf(
 		vystup,
 		delka_vystupu,
-		"%ld.%0*ld",
+		"%ld,%0*ld",
         (long)cela_cast,
         pocet_desetinnych_mist,
         (long)desetinna_cast

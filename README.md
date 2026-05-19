@@ -2,6 +2,24 @@
 **MMPa meteo** je víceúčelová meteostanice určená pro analýzu atmosféry, magnetického pole Země a dalších jevů. 
 Jedná se o projekt [týmu Pentagon](https://github.com/tym-pentagon). 
 
+## Komunikace
+Jednotky mezi sebou komunikují pomocí LoRa. 
+
+### Předávané proměnné
+| Index | Typ proměnné |  Název proměnné  |
+|-------|--------------|------------------|
+| 0-1   | int16_t      | cas.rok          |
+| 2     | int8_t       | cas.mesic        |
+| 3     | int8_t       | cas.den          |
+| 4     | int8_t       | cas.hodiny       |
+| 5     | int8_t       | cas.minuty       |
+| 6     | int8_t       | cas.sekundy      |
+| 7-10	| int32_t      | teplota          |
+| 11-14	| uint32_t     | vlhkost          |
+| 15-18 | uint32_t     | tlak             |
+| 19-60 |              |                  |
+| 61    | uint8_t      | crc              |
+
 > [!TIP]
 > Přečtěte si naši [dokumentaci](/Informace/README.md)!
 

@@ -32,7 +32,9 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "spi.h"
+#include "usart.h"
 #include "stm32_adafruit_lcd.h"
+#include "sd.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -77,7 +79,7 @@ typedef struct {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-uint8_t stavSD(void);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -135,6 +137,7 @@ uint8_t stavSD(void);
 #define LCD_Reset_GPIO_Port GPIOG
 
 /* USER CODE BEGIN Private defines */
+#define GPS_UART_HANDLE huart2
 #define LORA_SPI_HANDLE hspi2
 #define BME280_SPI_HANDLE hspi3
 #define SD_SPI_HANDLE hspi4

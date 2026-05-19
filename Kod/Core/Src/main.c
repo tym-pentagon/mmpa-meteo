@@ -23,6 +23,7 @@
 #include "i2c.h"
 #include "spi.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -33,12 +34,14 @@
 #include "string.h"
 #include "stdarg.h" // For va_list var arg functions
 #include "stdbool.h"
+#include "sd.h"
 
 /* Komunikace */
 #include "lora.h"
 
 /* Senzory */
 #include "bme280.h"
+#include "gps.h"
 
 /* Stránky */
 #include "hlavni_menu.h"
@@ -67,7 +70,7 @@ bool pripojeno = 1;
 uint16_t ping = 9999;
 
 Cas predchozi_cas = {2026, 4, 15, 14, 39, 2}; // Čas při předchozí aktualizace hodin
-Cas cas = {2026, 4, 15, 14, 39, 2};
+extern Cas cas;
 
 uint16_t predchozi_pozice_vyberu = 0;
 uint16_t pozice_vyberu = 0;
@@ -81,18 +84,9 @@ uint32_t vlhkost_venku, tlak_venku;
 
 bool stisknuto = 0; // Zda bylo stisknuto tlačítko na rotačním enkodéru
 
-/* Proměnné pro FatFs */
-FATFS FatFs; 	// FatFs handle
-FIL fil; 		// File handle
-FRESULT fres;   // Result after operations
-
-uint8_t predchozi_stav_promenne_sd_karta_pripojena = 2;
-// Předchozí stav proměnné je nastaven mimo rozsah, protože proměnná ještě nebyla inicializována.
-
-bool vyzkouseno_pripojeni_sd_karty = 0;
-bool sd_karta_pripojena = 0;
-uint32_t kapacita_sd_karty = 0; // KB
-uint32_t zaplneni_sd_karty = 0; // KB
+extern bool sd_karta_pripojena;
+extern uint32_t kapacita_sd_karty;
+extern uint32_t zaplneni_sd_karty;
 
 uint8_t strana = 0;
 
@@ -116,13 +110,15 @@ const char nazvy_mesicu[12][10] = {
 
 char debug[500];
 
-extern Disk_drvTypeDef  disk;
-
 extern bool can_send_data; // Zda LoRa může posílat data
 
 uint8_t lora_data[DATA_LEN]; // Data pro odeslání
 
+extern bool jednotka_ma_gps;
+extern bool jednotka_ziskala_cas_z_gps;
+
 bool mereni = false; // Zda se MCU má ptát senzorů na aktuální hodnoty
+bool je_cas_zapsat_log = false;
 // Měří se každou sekundu
 // Omezení je z důvodu přehřívání senzorů
 /* USER CODE END PV */
@@ -141,14 +137,6 @@ bool zkontrolovatChecksum(uint8_t data[], size_t data_len);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-/* Allow SD card remounting */
-DSTATUS disk_reinitialize (
-	BYTE pdrv				/* Physical drive number to identify the drive */
-)
-{
-	return disk.drv[pdrv]->disk_initialize(disk.lun[pdrv]);
-}
-
 void aktualizujCas(Cas *cas) {
 	/* Tato funkce se spustí každou sekundu, vždy aktualizuje proměnnou cas */
 	cas->sekundy ++;
@@ -187,7 +175,7 @@ void aktualizujCas(Cas *cas) {
 					cas->den = 0;
 					cas->mesic ++;
 
-					if (cas->mesic >= 12) {
+					if (cas->mesic >= 13) {
 						cas->mesic = 1;
 						cas->rok ++;
 					}
@@ -239,63 +227,13 @@ void tlacitkoStisknuto(void) {
 	else if (strana == 1) {
 		if (pozice_vyberu == 0) {
 			strana = 0;
-			predchozi_stav_promenne_sd_karta_pripojena = 2; // Mimo rozsah, protože spodní lišta potřebuje znovu vykreslit
-			vykresliHlavniMenu(pripojeno, ping, cas, &predchozi_pozice_vyberu, &pozice_vyberu, &max_pozice_vyberu, vyzkouseno_pripojeni_sd_karty);
+			vykresliHlavniMenu(pripojeno, ping, cas, &predchozi_pozice_vyberu, &pozice_vyberu, &max_pozice_vyberu);
 		}
 	}
 
 	ssd1306_SetCursor(122, 13);
 	ssd1306_WriteString("0", &Terminus12Bold, 1);
 	ssd1306_UpdateScreen(); // Vykreslí na OLED displej
-}
-
-uint8_t stavSD(void) {
-	/* Získá stav SD karty - zda je připojena, jakou má kapacitu a kolik je na ní volného místa */
-
-	f_mount(NULL, "", 1); // Nejprve odpojí
-
-	// 4. NOW initialize disk
-	if (disk_reinitialize(0) != RES_OK) {
-		vyzkouseno_pripojeni_sd_karty = 1;
-		sd_karta_pripojena = 0; // SD karta je odpojena
-	}
-	else {
-		fres = f_mount(&FatFs, "", 1); // 1 = mount now
-
-		if (fres != FR_OK) {
-			// Otevře filesystém
-			vyzkouseno_pripojeni_sd_karty = 1;
-			sd_karta_pripojena = 0; // SD karta je odpojena
-		}
-		else {
-			vyzkouseno_pripojeni_sd_karty = 1;
-			sd_karta_pripojena = 1; // SD karta je připojena
-
-			// Získá statistiky o zaplnění úložiště
-			DWORD free_clusters, free_sectors, total_sectors;
-
-			FATFS* getFreeFs;
-
-			fres = f_getfree("", &free_clusters, &getFreeFs);
-			if (fres != FR_OK) {
-				return 1; // Nelze přečíst údaje o zaplnění úložiště
-			}
-
-			// Formula comes from ChaN's documentation
-			total_sectors = (getFreeFs->n_fatent - 2) * getFreeFs->csize;
-			free_sectors = free_clusters * getFreeFs->csize;
-
-			kapacita_sd_karty = (total_sectors / 2);
-			zaplneni_sd_karty = (total_sectors / 2 - free_sectors / 2);
-		}
-	}
-
-	if (strana == 0 && sd_karta_pripojena != predchozi_stav_promenne_sd_karta_pripojena) { // Pokud je uživatel v hlavním menu
-		predchozi_stav_promenne_sd_karta_pripojena = sd_karta_pripojena;
-		aktualizujStavSDKartyVHlavnimMenu(sd_karta_pripojena, kapacita_sd_karty, zaplneni_sd_karty);
-	}
-
-	return 0; // Funkce úspěšně skončila
 }
 
 void pridatChecksum(uint8_t data[], size_t data_len) {
@@ -311,20 +249,32 @@ void pridatChecksum(uint8_t data[], size_t data_len) {
 void pripravitDataProOdeslani() {
 	memset(lora_data, 0, DATA_LEN); // Vynuluje data pro odeslání
 
-	lora_data[8] = (teplota >> 24) & 0xFF; // MSB
-	lora_data[9]  = (teplota >> 16) & 0xFF;
-	lora_data[10] = (teplota >> 8)  & 0xFF;
-	lora_data[11] = teplota & 0xFF;         // LSB
+	if (jednotka_ziskala_cas_z_gps) {
+		lora_data[0] = (cas.rok >> 8) & 0xFF; // MSB
+		lora_data[1] = cas.rok & 0xFF; // LSB
 
-	lora_data[12] = (vlhkost >> 24) & 0xFF; // MSB
-	lora_data[13]  = (vlhkost >> 16) & 0xFF;
-	lora_data[14] = (vlhkost >> 8)  & 0xFF;
-	lora_data[15] = vlhkost & 0xFF;         // LSB
+		lora_data[2] = cas.mesic;
+		lora_data[3] = cas.den;
 
-	lora_data[16] = (tlak >> 24) & 0xFF; // MSB
-	lora_data[17]  = (tlak >> 16) & 0xFF;
-	lora_data[18] = (tlak >> 8)  & 0xFF;
-	lora_data[19] = tlak & 0xFF;         // LSB
+		lora_data[4] = cas.hodiny;
+		lora_data[5] = cas.minuty;
+		lora_data[6] = cas.sekundy;
+	}
+
+	lora_data[7] = (teplota >> 24) & 0xFF; // MSB
+	lora_data[8]  = (teplota >> 16) & 0xFF;
+	lora_data[9] = (teplota >> 8)  & 0xFF;
+	lora_data[10] = teplota & 0xFF;         // LSB
+
+	lora_data[11] = (vlhkost >> 24) & 0xFF; // MSB
+	lora_data[12]  = (vlhkost >> 16) & 0xFF;
+	lora_data[13] = (vlhkost >> 8)  & 0xFF;
+	lora_data[14] = vlhkost & 0xFF;         // LSB
+
+	lora_data[15] = (tlak >> 24) & 0xFF; // MSB
+	lora_data[16]  = (tlak >> 16) & 0xFF;
+	lora_data[17] = (tlak >> 8)  & 0xFF;
+	lora_data[18] = tlak & 0xFF;         // LSB
 
 	pridatChecksum(lora_data, DATA_LEN);
 
@@ -352,25 +302,38 @@ void LoRa_Rx_callback(uint8_t data_received[], uint8_t len) {
 		// TODO: Error handling
 	}
 
+	if (!jednotka_ma_gps && (data_received[0] != 0 || data_received[1] != 0 || data_received[2] != 0 || data_received[3] != 0 || data_received[4] != 0 || data_received[5] != 0 || data_received[6] != 0)) {
+		cas.rok =
+			((uint16_t)data_received[0] << 8) |
+			((uint16_t)data_received[1]);
+
+		cas.mesic = (uint8_t)data_received[2];
+		cas.den = (uint8_t)data_received[3];
+
+		cas.hodiny = (uint8_t)data_received[4];
+		cas.minuty = (uint8_t)data_received[5];
+		cas.sekundy = (uint8_t)data_received[6];
+	}
+
 	teplota_venku =
 		(int32_t)(
-			((uint32_t)data_received[8] << 24) |
-			((uint32_t)data_received[9] << 16) |
-			((uint32_t)data_received[10] << 8)  |
-			((uint32_t)data_received[11])
+			((uint32_t)data_received[7] << 24) |
+			((uint32_t)data_received[8] << 16) |
+			((uint32_t)data_received[9] << 8)  |
+			((uint32_t)data_received[10])
 		);
 
 	vlhkost_venku =
-		((uint32_t)data_received[12] << 24) |
-		((uint32_t)data_received[13] << 16) |
-		((uint32_t)data_received[14] << 8)  |
-		((uint32_t)data_received[15]);
+		((uint32_t)data_received[11] << 24) |
+		((uint32_t)data_received[12] << 16) |
+		((uint32_t)data_received[13] << 8)  |
+		((uint32_t)data_received[14]);
 
 	tlak_venku =
-		((uint32_t)data_received[16] << 24) |
-		((uint32_t)data_received[17] << 16) |
-		((uint32_t)data_received[18] << 8)  |
-		((uint32_t)data_received[19]);
+		((uint32_t)data_received[15] << 24) |
+		((uint32_t)data_received[16] << 16) |
+		((uint32_t)data_received[17] << 8)  |
+		((uint32_t)data_received[18]);
 }
 /* USER CODE END 0 */
 
@@ -394,7 +357,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  HAL_Delay(2000); // Počká, než se všechny periferie inicializují a jsou schopné komunikovat.
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -416,8 +379,10 @@ int main(void)
   MX_SPI3_Init();
   MX_SPI2_Init();
   MX_TIM11_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   LoRa_init();
+  gps_init();
 
   HAL_ADC_Start(&hadc3);
 
@@ -461,7 +426,7 @@ int main(void)
 
   ssd1306_UpdateScreen(); // Vykreslí na OLED displej
 
-  vykresliHlavniMenu(pripojeno, ping, cas, &predchozi_pozice_vyberu, &pozice_vyberu, &max_pozice_vyberu, vyzkouseno_pripojeni_sd_karty);
+  vykresliHlavniMenu(pripojeno, ping, cas, &predchozi_pozice_vyberu, &pozice_vyberu, &max_pozice_vyberu);
 
   stavSD();
 
@@ -471,6 +436,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
 	  if (mereni) {
 		  BME280_Measure(&teplota, &vlhkost, &tlak);
 		  pripravitDataProOdeslani();
@@ -478,6 +444,7 @@ int main(void)
 	  }
 
 	  LoRa_loop();
+	  gps_loop();
 
 	  aktualizujPoziciVyberu();
 	  if (stisknuto == 1) {
@@ -486,9 +453,33 @@ int main(void)
 	  }
 
 	  stavSD();
+	  if (je_cas_zapsat_log) {
+		  char teplota_hodnota_text[20];
+		  char vlhkost_hodnota_text[20];
+		  char tlak_hodnota_text[20];
+
+		  char teplota_venku_hodnota_text[20];
+		  char vlhkost_venku_hodnota_text[20];
+		  char tlak_venku_hodnota_text[20];
+
+		  konverzeNamerenychHodnotSigned(teplota, 100, 2, teplota_hodnota_text, sizeof(teplota_hodnota_text));
+		  konverzeNamerenychHodnotUnsigned(vlhkost, 1024, 3, vlhkost_hodnota_text, sizeof(vlhkost_hodnota_text));
+		  konverzeNamerenychHodnotUnsigned(tlak, 256, 1, tlak_hodnota_text, sizeof(tlak_hodnota_text));
+
+		  konverzeNamerenychHodnotSigned(teplota_venku, 100, 2, teplota_venku_hodnota_text, sizeof(teplota_venku_hodnota_text));
+		  konverzeNamerenychHodnotUnsigned(vlhkost_venku, 1024, 3, vlhkost_venku_hodnota_text, sizeof(vlhkost_venku_hodnota_text));
+		  konverzeNamerenychHodnotUnsigned(tlak_venku, 256, 1, tlak_venku_hodnota_text, sizeof(tlak_venku_hodnota_text));
+
+		  char log[170];
+	  	  snprintf(log, 170, "%02d.%02d.%04d;%02d:%02d:%02d;%s;%s;%s;%s;%s;%s\n", cas.den, cas.mesic, cas.rok, cas.hodiny, cas.minuty, cas.sekundy, teplota_hodnota_text, vlhkost_hodnota_text, tlak_hodnota_text, teplota_venku_hodnota_text, vlhkost_venku_hodnota_text, tlak_venku_hodnota_text);
+	  	  zapsatLog("atm.csv", log);
+
+	  	  je_cas_zapsat_log = false;
+	  }
 
 	  if (strana == 0) { // Hlavní menu
 		  aktualizujHodinyVHlavnimMenu(cas, &predchozi_cas);
+		  aktualizujStavSDKartyVHlavnimMenu(sd_karta_pripojena, kapacita_sd_karty, zaplneni_sd_karty);
 	  }
 	  if (strana == 1) { // Atmosféra
 		  aktualizujHodnotyNaStranceAtmosfera(teplota, vlhkost, tlak, teplota_venku, vlhkost_venku, tlak_venku);
@@ -556,8 +547,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	}
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM2) {
 		LoRa_TIM2_interrupt_handler();
 	}
@@ -566,7 +556,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         // Kód, který se spustí každou sekundu:
     	mereni = true;
     	aktualizujCas(&cas);
+    	if (cas.sekundy == 0) {
+    		je_cas_zapsat_log = true;
+    	}
     }
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	if (huart->Instance == USART2) {
+		gps_UART_RxCpltCallback_handler();
+	}
 }
 /* USER CODE END 4 */
 
