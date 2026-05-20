@@ -1,3 +1,6 @@
+> [!WARNING]
+> Tato dokumentace zahrnuje obecný stav projektu, nikoliv jeho vnitřní tok. Namísto vysvětlování je pro tento účel dočasně postavena prezentace [Mikrokontroléry letí 2026](about:blank).
+
 > [!IMPORTANT]
 > ### Stanice `MMPa meteo` se momentálně skládá ze dvou desek.
 > **Deska vnější** je vybavena sensory, ze kterých po intervalech čte data a technologií [LoRa](/Informace/README.md#komunikace) je posílá desce vnitřní.  
@@ -87,6 +90,20 @@ Viz. [schéma](/Schema/schema.pdf).
 | 2.4 $\text{GHz}$ Wi-Fi  || 450 $\text{Mbps}$ - 600 $\text{Mbps}$ | 36 $\text{m}$   |
 | 5 $\text{GHz}$ Wi-Fi    || 1.3 $\text{Gbps}$            | 12 $\text{m}$   |
 |   [Bluetooth](https://cs.wikipedia.org/wiki/Bluetooth)|| dle verze (max 24 $\text{MBps}$)| dle verze (max 100 $\text{m}$)|
-
 > [!NOTE]
 > Jde pouze o přibližné hodnoty, skutečný dosah a rychlost budou omezeny rychlostí mikrokontroléru, rušením signálu a typem prostředí. 
+
+#### LoRa: Předávané proměnné
+| Index | Typ proměnné |  Název proměnné  |
+|-------|--------------|------------------|
+| 0-1   | int16_t      | cas.rok          |
+| 2     | int8_t       | cas.mesic        |
+| 3     | int8_t       | cas.den          |
+| 4     | int8_t       | cas.hodiny       |
+| 5     | int8_t       | cas.minuty       |
+| 6     | int8_t       | cas.sekundy      |
+| 7-10	| int32_t      | teplota          |
+| 11-14	| uint32_t     | vlhkost          |
+| 15-18 | uint32_t     | tlak             |
+| 19-60 |              |                  |
+| 61    | uint8_t      | crc              |
