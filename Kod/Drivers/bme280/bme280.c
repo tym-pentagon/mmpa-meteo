@@ -193,7 +193,8 @@ void BME280_Measure(int32_t *temperature, uint32_t *humidity, uint32_t *pressure
         	*temperature = 0; // temp disabled
         }
         else {
-        	*temperature = BME280_compensate_T_int32(tRaw); // Po vydělení 100 ve °C
+        	*temperature = BME280_compensate_T_int32(tRaw) - 5 * 100; // Po vydělení 100 ve °C
+        	// Dočasná kompenzace kvůli ohřívání senzoru
         }
 
         if (hRaw == 0x8000) {
@@ -207,7 +208,8 @@ void BME280_Measure(int32_t *temperature, uint32_t *humidity, uint32_t *pressure
         	*pressure = 0; // pressure disabled
         }
         else {
-			*pressure = BME280_compensate_P_int64(pRaw); // Po vydělení 256 v Pa
+			*pressure = BME280_compensate_P_int64(pRaw) + 256 * 5 * 5; // Po vydělení 256 v Pa
+			// Dočasná kompenzace kvůli ohřívání senzoru
         }
     }
     else {
