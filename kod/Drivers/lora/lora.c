@@ -14,21 +14,9 @@
 extern TIM_HandleTypeDef htim2;
 
 // LoRa   datasheet - https://www.mouser.com/pdfDocs/DS_LLCC68_V10-2.pdf?srsltid=AfmBOoqgLAHkumEmWHl771-ee9YzS_uiDHctigYXl9kTrGpDE34ddVFQ
-uint8_t LoRa_SetStandby[] = {0x80, 0x00}; // po resetu do standby RC (takhle to psali v dokumentaci 14.2)
-uint8_t LoRa_SetPacketType[] = {0x8A, 0x01}; //packet type = LoRa
-uint8_t LoRa_SetRfFrequency[] = {0x86, 0x1B, 0x14, 0x00, 0x00}; //433.25 MH
-uint8_t LoRa_SetPaConfig[] = {0x95, 0x02, 0x02, 0x00, 0x01}; //power amplifier = +14dBm
-uint8_t LoRa_SetTxParams[] = {0x8E, 0x03, 0x03}; // power = +3dBm, RampTime = 80 mikrosekund
-uint8_t LoRa_SetBufferBaseAdress[] = {0x8F, 0x00, 0x00}; //TX i RX používají stejný buffer
+
 uint8_t LoRa_WriteBuffer[DATA_LEN + 2] = {0x0E, 0x00}; // Toto dá data do bufferu a připraví je tak na odeslání, data začínají 3.arg. - nastavuju v main
-uint8_t LoRa_SetModulationParams[] = {0x8B, 0x0A, 0x05, 0x06, 0x01}; //SF, BW, CD, lowDataOptimize
 uint8_t LoRa_SetPacketParams[] = {0x8C, 0x00, 0x08, 0x00, 0x01, 0x01, 0x00}; //preamble = 8bitů (MSB 0->8 LSB), explicit header(dle Roberta), 5.arg je délka dat které chceme poslat (přepisuju v set_data), CRC on, IQ normal
-uint8_t LoRa_SetDioIrqParams[] = {0x08, 0x02, 0x03, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00}; // signály Tx done, RX done a timeout (dal jsem i na DIO1 - nepoužívám) - 0x0001 = TX done, 0x0002 = RX done, 0x0200 = timeout (0x0040 je CRC ERR - nepoužívám)
-uint8_t LoRa_WriteRegister_SyncWordMSB[] = {0x0D, 0x07, 0x40, 0x12}; //SyncWord MSB - last arg  (stored in register 0x0740)
-uint8_t LoRa_WriteRegister_SyncWordLSB[] = {0x0D, 0x07, 0x41, 0x34}; //SyncWord LSB - last arg  (stored in register 0x0741)
-uint8_t LoRa_SetTX[] = {0x83, 0x01, 0xF4, 0x00}; // sets LoRa to TX, 2s timeout ; transmits data in buffer
-uint8_t LoRa_SetRX[] = {0x82, 0x04, 0xE2, 0x01}; //sets LoRa to Rx, 00,00,00 means continous Rx (until recieving something), now 5s timeout
-uint8_t LoRa_GetRxBufferStatus[] = {0x13, 0x00, 0x00, 0x00}; //returns recieved data length and offset needed to read the data
 uint8_t LoRa_ReadBuffer[DATA_LEN+3] = {0x1E}; // from 3.arg (inclusive) are dummy bytes
 uint8_t LoRa_ClearIrqStatus[] = {0x02, 0xFF, 0xFF}; //clears all interrupt flags
 uint8_t LoRa_GetIrqStatus[] = {0x12, 0x00, 0x00,0x00}; // gets LoRa interrupt status - Rx/Tx done, timeout
@@ -85,6 +73,8 @@ __weak void LoRa_Rx_callback(uint8_t data[], uint8_t len) {
 }
 
 void LoRa_process_data() {
+	uint8_t LoRa_GetRxBufferStatus[] = {0x13, 0x00, 0x00, 0x00}; //returns recieved data length and offset needed to read the data
+
 	/* Stores data in data_recieved and toggles LED */
 	uint8_t RecRxBufferStatus[4]; //store here
 	transmit_recieve_SPI_variable(LoRa_GetRxBufferStatus, RecRxBufferStatus, 4);
@@ -110,6 +100,19 @@ void LoRa_process_data() {
 }
 
 void LoRa_init() {
+
+	uint8_t LoRa_SetStandby[] = {0x80, 0x00}; // po resetu do standby RC (takhle to psali v dokumentaci 14.2)
+	uint8_t LoRa_SetPacketType[] = {0x8A, 0x01}; //packet type = LoRa
+	uint8_t LoRa_SetRfFrequency[] = {0x86, 0x1B, 0x14, 0x00, 0x00}; //433.25 MH
+	uint8_t LoRa_SetPaConfig[] = {0x95, 0x02, 0x02, 0x00, 0x01}; //power amplifier = +14dBm
+	uint8_t LoRa_SetTxParams[] = {0x8E, 0x03, 0x03}; // power = +3dBm, RampTime = 80 mikrosekund
+	uint8_t LoRa_SetBufferBaseAdress[] = {0x8F, 0x00, 0x00}; //TX i RX používají stejný buffer
+	uint8_t LoRa_SetModulationParams[] = {0x8B, 0x0A, 0x05, 0x06, 0x01}; //SF, BW, CD, lowDataOptimize
+	uint8_t LoRa_SetDioIrqParams[] = {0x08, 0x02, 0x03, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00}; // signály Tx done, RX done a timeout (dal jsem i na DIO1 - nepoužívám) - 0x0001 = TX done, 0x0002 = RX done, 0x0200 = timeout (0x0040 je CRC ERR - nepoužívám)
+	uint8_t LoRa_WriteRegister_SyncWordMSB[] = {0x0D, 0x07, 0x40, 0x12}; //SyncWord MSB - last arg  (stored in register 0x0740)
+	uint8_t LoRa_WriteRegister_SyncWordLSB[] = {0x0D, 0x07, 0x41, 0x34}; //SyncWord LSB - last arg  (stored in register 0x0741)
+
+
 	NSS_high();
 
 	/* LoRa reset on startup */
@@ -133,12 +136,16 @@ void LoRa_init() {
 }
 
 void LoRa_start_Rx() {
+	uint8_t LoRa_SetRX[] = {0x82, 0x04, 0xE2, 0x01}; //sets LoRa to Rx, 00,00,00 means continous Rx (until recieving something), now 5s timeout
+
 	/* Starts Rx */
 	transmit_SPI_variable(LoRa_ClearIrqStatus, sizeof(LoRa_ClearIrqStatus));
 	transmit_SPI_variable(LoRa_SetRX, sizeof(LoRa_SetRX));
 }
 
 void LoRa_send_data() {
+	uint8_t LoRa_SetTX[] = {0x83, 0x01, 0xF4, 0x00}; // sets LoRa to TX, 2s timeout ; transmits data in buffer
+
 	/* Transmits WriteBuffer and starts Tx */
 	transmit_SPI_variable(LoRa_WriteBuffer, sizeof(LoRa_WriteBuffer));
 	transmit_SPI_variable(LoRa_ClearIrqStatus, sizeof(LoRa_ClearIrqStatus));
