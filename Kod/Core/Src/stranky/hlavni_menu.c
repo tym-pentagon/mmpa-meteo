@@ -39,21 +39,7 @@ void vykresliHorniListuVHlavnimMenu(bool pripojeno, uint16_t ping) {
 	BSP_LCD_DisplayStringAt(PADDING, (VYSKA_HORNI_LISTY_V_HLAVNIM_MENU - 1) / 2 - Terminus20Normal.Height / 2, (uint8_t *)spojeni_text, LEFT_MODE);
 
 	/* Stav spojení */
-	BSP_LCD_SetFont(&Terminus20Bold);
-	if (pripojeno != 0) {
-		const char pripojeno_text[] = {
-		    0x70, 0xF8, 0x69, 0x70, 0x6F, 0x6A, 0x65, 0x6E, 0x6F, 0x00,  // "připojeno"
-		};
-		BSP_LCD_SetTextColor(BARVA_UI_PRIMARNI);
-		BSP_LCD_DisplayStringAt(PADDING + Terminus20Normal.Width * strlen(spojeni_text), (VYSKA_HORNI_LISTY_V_HLAVNIM_MENU - 1) / 2 - Terminus20Bold.Height / 2, (uint8_t *)pripojeno_text, LEFT_MODE);
-	}
-	else {
-		const char odpojeno_text[] = {
-			0x6F, 0x64, 0x70, 0x6F, 0x6A, 0x65, 0x6E, 0x6F, 0x00,  // "odpojeno"
-		};
-		BSP_LCD_SetTextColor(BARVA_UPOZORNENI);
-		BSP_LCD_DisplayStringAt(PADDING + Terminus20Normal.Width * strlen(spojeni_text), (VYSKA_HORNI_LISTY_V_HLAVNIM_MENU - 1) / 2 - Terminus20Bold.Height / 2, (uint8_t *)odpojeno_text, LEFT_MODE);
-	}
+	aktualizujStavPripojeni(pripojeno);
 
 	/* Ping */
 	BSP_LCD_SetFont(&Terminus20Normal);
@@ -80,6 +66,23 @@ void vykresliHorniListuVHlavnimMenu(bool pripojeno, uint16_t ping) {
 
 	BSP_LCD_SetTextColor(BARVA_UI_TERCIARNI);
 	BSP_LCD_DrawHLine(PADDING, VYSKA_HORNI_LISTY_V_HLAVNIM_MENU - BORDER, SIRKA_DISPLEJE - 2 * PADDING); // Border
+}
+void aktualizujStavPripojeni(bool pripojeno) {
+	BSP_LCD_SetFont(&Terminus20Bold);
+	if (pripojeno != false) {
+		const char pripojeno_text[] = {
+			0x70, 0xF8, 0x69, 0x70, 0x6F, 0x6A, 0x65, 0x6E, 0x6F, 0x00,  // "připojeno"
+		};
+		BSP_LCD_SetTextColor(BARVA_UI_PRIMARNI);
+		BSP_LCD_DisplayStringAt(PADDING + Terminus20Normal.Width * (strlen(pripojeno_text)-1), (VYSKA_HORNI_LISTY_V_HLAVNIM_MENU - 1) / 2 - Terminus20Bold.Height / 2, (uint8_t *)pripojeno_text, LEFT_MODE);
+	}
+	else {
+		const char odpojeno_text[] = {
+			0x6F, 0x64, 0x70, 0x6F, 0x6A, 0x65, 0x6E, 0x6F, 0x20, 0x00,  // "odpojeno "
+		};
+		BSP_LCD_SetTextColor(BARVA_UPOZORNENI);
+		BSP_LCD_DisplayStringAt(PADDING + Terminus20Normal.Width * (strlen(odpojeno_text)-1), (VYSKA_HORNI_LISTY_V_HLAVNIM_MENU - 1) / 2 - Terminus20Bold.Height / 2, (uint8_t *)odpojeno_text, LEFT_MODE);
+	}
 }
 
 void aktualizujStavSDKartyVHlavnimMenu(bool sd_karta_pripojena, uint32_t kapacita_sd_karty, uint32_t zaplneni_sd_karty) {
@@ -201,7 +204,7 @@ void aktualizujPoziciVyberuVHlavnimMenu(uint16_t predchozi_pozice_vyberu, uint16
 	BSP_LCD_DrawPolygon(ctyruhelniky[pozice_vyberu], 4);
 }
 
-uint8_t vykresliHlavniMenu(uint8_t pripojeno, uint16_t ping, Cas cas, uint16_t *predchozi_pozice_vyberu, uint16_t *pozice_vyberu, uint16_t *max_pozice_vyberu) {
+uint8_t vykresliHlavniMenu(bool pripojeno, uint16_t ping, Cas cas, uint16_t *predchozi_pozice_vyberu, uint16_t *pozice_vyberu, uint16_t *max_pozice_vyberu) {
 	BSP_LCD_Clear(BARVA_POZADI);
 	BSP_LCD_SetBackColor(BARVA_POZADI);
 

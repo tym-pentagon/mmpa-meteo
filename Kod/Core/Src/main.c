@@ -66,7 +66,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-bool pripojeno = 1;
+extern bool pripojeno;
+bool previousPripojeno;
 uint16_t ping = 9999;
 
 Cas predchozi_cas = {2026, 4, 15, 14, 39, 2}; // Čas při předchozí aktualizace hodin
@@ -477,6 +478,7 @@ int main(void)
 	  }
 
 	  if (strana == 0) { // Hlavní menu
+		  if (previousPripojeno != pripojeno) { aktualizujStavPripojeni(pripojeno); previousPripojeno = pripojeno; }
 		  aktualizujHodinyVHlavnimMenu(cas, &predchozi_cas);
 		  aktualizujStavSDKartyVHlavnimMenu(sd_karta_pripojena, kapacita_sd_karty, zaplneni_sd_karty);
 	  }

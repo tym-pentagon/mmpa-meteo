@@ -11,10 +11,11 @@
 #include "main.h"
 #include "stdbool.h"
 
+void aktualizujStavPripojeni(bool pripojeno);
 void aktualizujStavSDKartyVHlavnimMenu(bool sd_karta_pripojena, uint32_t kapacita_sd_karty, uint32_t zaplneni_sd_karty);
 void aktualizujHodinyVHlavnimMenu(Cas cas, Cas *predchozi_cas);
 void aktualizujPoziciVyberuVHlavnimMenu(uint16_t predchozi_pozice_vyberu, uint16_t pozice_vyberu);
-uint8_t vykresliHlavniMenu(uint8_t pripojeno, uint16_t ping, Cas cas, uint16_t *predchozi_pozice_vyberu, uint16_t *pozice_vyberu, uint16_t *max_pozice_vyberu);
+uint8_t vykresliHlavniMenu(bool pripojeno, uint16_t ping, Cas cas, uint16_t *predchozi_pozice_vyberu, uint16_t *pozice_vyberu, uint16_t *max_pozice_vyberu);
 
 /* Rozměry konkrétních prvků */
 // Všechny rozměry jsou včetně borderů, bez paddingu

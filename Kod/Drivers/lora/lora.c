@@ -44,6 +44,8 @@ typedef enum {
 } LoRa_event_t;
 
 volatile LoRa_event_t LoRa_state = LORA_TX;
+uint8_t timeoutCounter = 0;
+volatile bool pripojeno = false;
 
 void NSS_high() {
 	HAL_GPIO_WritePin(LoRa_NSS_GPIO_Port, LoRa_NSS_Pin, 1); // NSS jde do 1
@@ -177,6 +179,10 @@ void LoRa_DIO1_interrupt_handler() {
 
 	if (irq[3] & 0x02) {
 	    // RX done (data received)
+
+		pripojeno = true;
+		timeoutCounter = 0;
+
 	    LoRa_process_data();
 
 	    /* Start timer to interrupt */
@@ -186,6 +192,9 @@ void LoRa_DIO1_interrupt_handler() {
 
 	if (irq[2] & 0x02) {
 	    // Timeout
+		timeoutCounter += 1;
+		if (timeoutCounter > 0) pripojeno = false;
+
 		if (LoRa_state == LORA_WAIT_AFTER_TX) {
 			// Nepodařilo se odeslat packet
 			// TODO: Error handling
