@@ -26,7 +26,7 @@ uint8_t LoRa_SetPacketParams[] = {0x8C, 0x00, 0x08, 0x00, 0x01, 0x01, 0x00}; //p
 uint8_t LoRa_SetDioIrqParams[] = {0x08, 0x02, 0x03, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00}; // signály Tx done, RX done a timeout (dal jsem i na DIO1 - nepoužívám) - 0x0001 = TX done, 0x0002 = RX done, 0x0200 = timeout (0x0040 je CRC ERR - nepoužívám)
 uint8_t LoRa_WriteRegister_SyncWordMSB[] = {0x0D, 0x07, 0x40, 0x12}; //SyncWord MSB - last arg  (stored in register 0x0740)
 uint8_t LoRa_WriteRegister_SyncWordLSB[] = {0x0D, 0x07, 0x41, 0x34}; //SyncWord LSB - last arg  (stored in register 0x0741)
-uint8_t LoRa_SetTX[] = {0x83, 0x01, 0xF4, 0x00}; // sets LoRa to TX, 2s timeout ; transmits data in buffer
+uint8_t LoRa_SetTX[] = {0x83, 0x00, 0xFA, 0x00}; // sets LoRa to TX, 1s timeout ; transmits data in buffer
 uint8_t LoRa_SetRX[] = {0x82, 0x09, 0xC4, 0x00}; //sets LoRa to Rx, 00,00,00 means continous Rx (until recieving something), now 10s timeout
 uint8_t LoRa_GetRxBufferStatus[] = {0x13, 0x00, 0x00, 0x00}; //returns recieved data length and offset needed to read the data
 uint8_t LoRa_ReadBuffer[DATA_LEN+3] = {0x1E}; // from 3.arg (inclusive) are dummy bytes
