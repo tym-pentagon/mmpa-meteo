@@ -15,12 +15,6 @@ extern TIM_HandleTypeDef htim2;
 
 // LoRa   datasheet - https://www.mouser.com/pdfDocs/DS_LLCC68_V10-2.pdf?srsltid=AfmBOoqgLAHkumEmWHl771-ee9YzS_uiDHctigYXl9kTrGpDE34ddVFQ
 
-uint8_t LoRa_WriteBuffer[DATA_LEN + 2] = {0x0E, 0x00}; // Toto dá data do bufferu a připraví je tak na odeslání, data začínají 3.arg. - nastavuju v main
-uint8_t LoRa_SetPacketParams[] = {0x8C, 0x00, 0x08, 0x00, 0x01, 0x01, 0x00}; //preamble = 8bitů (MSB 0->8 LSB), explicit header(dle Roberta), 5.arg je délka dat které chceme poslat (přepisuju v set_data), CRC on, IQ normal
-uint8_t LoRa_ReadBuffer[DATA_LEN+3] = {0x1E}; // from 3.arg (inclusive) are dummy bytes
-uint8_t LoRa_ClearIrqStatus[] = {0x02, 0xFF, 0xFF}; //clears all interrupt flags
-uint8_t LoRa_GetIrqStatus[] = {0x12, 0x00, 0x00,0x00}; // gets LoRa interrupt status - Rx/Tx done, timeout
-
 // user
 uint8_t irq[] = {0x00, 0x00, 0x00, 0x00}; // var for storing the status
 
@@ -61,6 +55,7 @@ void transmit_recieve_SPI_variable(uint8_t *Tx_name, uint8_t *Rx_name, uint8_t s
 }
 
 void LoRa_set_data(uint8_t data[], uint8_t len) { // set data for transmission
+	uint8_t LoRa_SetPacketParams[] = {0x8C, 0x00, 0x08, 0x00, 0x01, 0x01, 0x00}; //preamble = 8bitů (MSB 0->8 LSB), explicit header(dle Roberta), 5.arg je délka dat které chceme poslat (přepisuju v set_data), CRC on, IQ normal
 	LoRa_SetPacketParams[4] = len;
 	for (int i = 0; i<len; i++) {
 		LoRa_WriteBuffer[i+2] = data[i];
@@ -136,6 +131,7 @@ void LoRa_init() {
 }
 
 void LoRa_start_Rx() {
+	uint8_t LoRa_ClearIrqStatus[] = {0x02, 0xFF, 0xFF}; //clears all interrupt flags
 	uint8_t LoRa_SetRX[] = {0x82, 0x04, 0xE2, 0x01}; //sets LoRa to Rx, 00,00,00 means continous Rx (until recieving something), now 5s timeout
 
 	/* Starts Rx */
@@ -144,6 +140,8 @@ void LoRa_start_Rx() {
 }
 
 void LoRa_send_data() {
+	uint8_t LoRa_WriteBuffer[DATA_LEN + 2] = {0x0E, 0x00}; // Toto dá data do bufferu a připraví je tak na odeslání, data začínají 3.arg. - nastavuju v main
+	uint8_t LoRa_ClearIrqStatus[] = {0x02, 0xFF, 0xFF}; //clears all interrupt flags
 	uint8_t LoRa_SetTX[] = {0x83, 0x01, 0xF4, 0x00}; // sets LoRa to TX, 2s timeout ; transmits data in buffer
 
 	/* Transmits WriteBuffer and starts Tx */
@@ -174,6 +172,8 @@ void LoRa_loop() {
 }
 
 void LoRa_DIO1_interrupt_handler() {
+	uint8_t LoRa_GetIrqStatus[] = {0x12, 0x00, 0x00,0x00}; // gets LoRa interrupt status - Rx/Tx done, timeout
+	uint8_t LoRa_ClearIrqStatus[] = {0x02, 0xFF, 0xFF}; //clears all interrupt flags
 	transmit_recieve_SPI_variable(LoRa_GetIrqStatus, irq, 4);
 
 	if (irq[3] & 0x01) {
